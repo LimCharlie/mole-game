@@ -1,35 +1,52 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState, useEffect } from 'react';
+import mole from './assets/mole.png';
+import hole from './assets/hole.png';
+import './App.css';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [moles, setMoles] = useState<boolean[]>(new Array(9).fill(false));
+  const [score, setScore] = useState<number>(0);
+
+
+  function setMolesVisible(index: number, isVisible: boolean) {
+    setMoles((currMoles) => {
+      const newMoles = [...currMoles];
+      newMoles[index] = isVisible;
+      return newMoles;
+    });
+  }
+
+  function wackMole(index: number) {
+    if (!mole[index]) return;
+    setMolesVisible(index, false)
+    setScore(score + 1);
+  }
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const randomIndex = Math.floor(Math.random() * moles.length);
+      setMolesVisible(randomIndex, true)
+      setTimeout(() => {
+        setMolesVisible(randomIndex, false);
+      }, 700);
+    }, 1000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [moles]);
+
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      <h1>Score {score}</h1>
+      <div className='grid'>
+        {moles.map((isMole, index) => (
+          <img key={index} src={isMole ? mole : hole} onClick={() => {wackMole(index)}} />
+        ))}
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
